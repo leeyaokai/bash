@@ -1,0 +1,24 @@
+#!/bin/bash
+yum -y install ipmitool
+yum -y install OpenIPMI*
+service ipmi start
+NowIP=$(ipmitool lan print | grep 'IP Address' | grep -v 'IP Address Source'|awk 'BEGIN {FS=":"};{print $2}')
+echo "Current IPMI Address:$NowIP"
+read -p "New IPMI IP (***.***.***.***) : " NewIP
+read -p "New IPMI Mask (255.255.255.0): " NewMask
+read -p "New IPMI Gateway (***.***.***.***): " NewGate
+echo "Please Check New IPMI IP: $NewIP"
+echo "Please Check New IPMI Mask: $NewMask"
+echo "Please Check New IPMI Gateway: $NewGate"
+read -p "Those Information is correct ?(Y/N):" yn
+if [ "${yn}" == "Y" ] || [ "${yn}" == "y" ]; then
+    ipmitool lan set 1 ipsrc static
+    ipmitool lan set 1 ipaddr $NewIP
+    ipmitool lan set 1 netmask $NewMask
+    ipmitool lan set 1 defgw ipaddr $NewGate
+    echo "Please use borwser check IPMI Web"
+    exit 0
+else
+    echo "interrupt!"
+    exit 0
+fi
